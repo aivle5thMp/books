@@ -1,5 +1,5 @@
 server:
-  port: 8084  # 실제 사용할 포트
+  port: 8084
 
 kafka:
   topics:
@@ -14,7 +14,7 @@ spring:
       enabled: true
       force: true
   datasource:
-    url: jdbc:h2:file:./data/bookdb
+    url: jdbc:h2:file:./data/bookdb;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;CHARSET=UTF8
     driver-class-name: org.h2.Driver
     username: sa
     password:
@@ -28,6 +28,11 @@ spring:
         show_sql: true
         format_sql: true
         implicit_naming_strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl
+    hibernate:
+      ddl-auto: update
+  sql:
+    init:
+      mode: always
   cloud:
     stream:
       kafka:
@@ -59,8 +64,36 @@ logging:
 
 spring:
   profiles: docker
+  jpa:
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        implicit_naming_strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl
+    hibernate:
+      ddl-auto: create-drop
   cloud:
     stream:
       kafka:
         binder:
-          brokers: my-kafka:9092  # Docker 환경에서만 다른 Kafka 주소
+          brokers: my-kafka:9092
+        streams:
+          binder:
+            configuration:
+              default:
+                key:
+                  serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+                value:
+                  serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+      bindings:
+        event-in:
+          group: books
+          destination: mp
+          contentType: application/json
+        event-out:
+          destination: mp
+          contentType: application/json
+
+kafka:
+  topics:
+    book-info-sent: book.published.v1
