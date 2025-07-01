@@ -12,7 +12,6 @@ import org.springframework.transaction.support.TransactionSynchronizationAdapter
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.MimeTypeUtils;
 
-//<<< Clean Arch / Outbound Adaptor
 public class AbstractEvent {
 
     String eventType;
@@ -29,34 +28,31 @@ public class AbstractEvent {
     }
 
     public void publish() {
-        /**
-         * spring streams 방식
-         */
         KafkaProcessor processor = BooksApplication.applicationContext.getBean(
-            KafkaProcessor.class
+                KafkaProcessor.class
         );
         MessageChannel outputChannel = processor.outboundTopic();
 
         outputChannel.send(
-            MessageBuilder
-                .withPayload(this)
-                .setHeader(
-                    MessageHeaders.CONTENT_TYPE,
-                    MimeTypeUtils.APPLICATION_JSON
-                )
-                .setHeader("type", getEventType())
-                .build()
+                MessageBuilder
+                        .withPayload(this)
+                        .setHeader(
+                                MessageHeaders.CONTENT_TYPE,
+                                MimeTypeUtils.APPLICATION_JSON
+                        )
+                        .setHeader("type", getEventType())
+                        .build()
         );
     }
 
     public void publishAfterCommit() {
         TransactionSynchronizationManager.registerSynchronization(
-            new TransactionSynchronizationAdapter() {
-                @Override
-                public void afterCompletion(int status) {
-                    AbstractEvent.this.publish();
+                new TransactionSynchronizationAdapter() {
+                    @Override
+                    public void afterCompletion(int status) {
+                        AbstractEvent.this.publish();
+                    }
                 }
-            }
         );
     }
 
@@ -80,17 +76,27 @@ public class AbstractEvent {
         return getEventType().equals(getClass().getSimpleName());
     }
 
+    // ✅ 방법 3: 모든 버전 호환되는 안전한 방법
     public String toJson() {
         ObjectMapper objectMapper = new ObjectMapper();
-        String json = null;
+
+        // 문자열로 직접 설정 (가장 호환성 좋음)
+        try {
+            objectMapper.setPropertyNamingStrategy(
+                    com.fasterxml.jackson.databind.PropertyNamingStrategy.LOWER_CAMEL_CASE
+            );
+            System.out.println("✅ PropertyNamingStrategy 카멜케이스 설정 성공");
+        } catch (Exception e) {
+            // 구버전 Jackson인 경우 기본값 사용
+            System.out.println("⚠️ PropertyNamingStrategy 설정 실패, 기본값 사용: " + e.getMessage());
+        }
 
         try {
-            json = objectMapper.writeValueAsString(this);
+            String json = objectMapper.writeValueAsString(this);
+            System.out.println("📤 생성된 JSON: " + json);
+            return json;
         } catch (JsonProcessingException e) {
             throw new RuntimeException("JSON format exception", e);
         }
-
-        return json;
     }
 }
-//>>> Clean Arch / Outbound Adaptor

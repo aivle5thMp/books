@@ -1,15 +1,21 @@
 server:
   port: 8084
-
 kafka:
   topics:
     book-info-sent: book.published.v1
-
 spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer  # 이거 추가!
+      properties:
+        spring.json.type.mapping: bookInfoSent:mp.infra.BookInfoSent
+
   application:
     name: books
   jackson:
-    property-naming-strategy: SNAKE_CASE
+    property-naming-strategy: LOWER_CAMEL_CASE
   http:
     encoding:
       charset: UTF-8

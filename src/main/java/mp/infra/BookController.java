@@ -62,15 +62,20 @@ public class BookController {
     public ResponseEntity<String> createBook(@RequestBody BookCreateRequestDto dto) {
         try {
             bookService.saveBook(dto);
-            // DTO 정보로 이벤트 생성 (bookId는 없음)
-            BookInfoSent event = new BookInfoSent();
-            // event.setBookId(null);  // 생성 후 ID를 모르므로 null
-            event.setAuthorId(dto.getAuthorId());  // DTO에서 가져옴
-            event.setTitle(dto.getTitle());        // DTO에서 가져옴
+            // 2. 카프카는 별도 try-catch로 처리 (실패해도 책 저장은 성공)
+            try {
+                BookInfoSent event = new BookInfoSent();
+                event.setAuthorId(dto.getAuthorId());
+                event.setTitle(dto.getTitle());
 
-            kafkaTemplate.send("book.published.v1", event);
-            System.out.println("📤 Book 생성 알림 발송 완료: " + event);
+                kafkaTemplate.send("book.published.v1", event);
+                System.out.println("📤 카프카 이벤트 발송 성공!");
+            } catch (Exception kafkaError) {
+                System.err.println("⚠️ 카프카 발송 실패 (하지만 책은 저장됨): " + kafkaError.getMessage());
+                // 카프카 실패해도 책 저장은 성공했으므로 계속 진행
+            }
             return ResponseEntity.status(HttpStatus.CREATED).body("Book created successfully");
+
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create book");
         }
