@@ -8,6 +8,7 @@ import mp.infra.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
@@ -55,10 +56,20 @@ public class BookController {
         }
     }
     // ✅ 도서 추가 API
+    @Autowired
+    private KafkaTemplate<String, BookInfoSent> kafkaTemplate;
     @PostMapping("/create")
     public ResponseEntity<String> createBook(@RequestBody BookCreateRequestDto dto) {
         try {
             bookService.saveBook(dto);
+            // DTO 정보로 이벤트 생성 (bookId는 없음)
+            BookInfoSent event = new BookInfoSent();
+            // event.setBookId(null);  // 생성 후 ID를 모르므로 null
+            event.setAuthorId(dto.getAuthorId());  // DTO에서 가져옴
+            event.setTitle(dto.getTitle());        // DTO에서 가져옴
+
+            kafkaTemplate.send("book.published.v1", event);
+            System.out.println("📤 Book 생성 알림 발송 완료: " + event);
             return ResponseEntity.status(HttpStatus.CREATED).body("Book created successfully");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create book");

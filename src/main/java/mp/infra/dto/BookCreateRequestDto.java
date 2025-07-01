@@ -19,7 +19,12 @@ public class BookCreateRequestDto {
 
     // 기본 생성자
     public BookCreateRequestDto() {}
-
+    public UUID getAuthorId() {
+        return authorId;
+    }
+    public UUID setAuthorId() {
+        return authorId;
+    }
     // Getters & Setters
     public String getAuthorName() {
         return authorName;
