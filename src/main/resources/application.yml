@@ -1,14 +1,18 @@
 server:
-  port: 8080
+  port: 8084  # 실제 사용할 포트
+
 kafka:
   topics:
-    book-info-sent: book-info-sent-topic
+    book-info-sent: book.published.v1
+
 spring:
   application:
     name: books
----
-
-spring:
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
   datasource:
     url: jdbc:h2:file:./data/bookdb
     driver-class-name: org.h2.Driver
@@ -40,14 +44,10 @@ spring:
       bindings:
         event-in:
           group: books
-#<<< EDA / Topic Name
           destination: mp
-#>>> EDA / Topic Name
           contentType: application/json
         event-out:
-#<<< EDA / Topic Name
           destination: mp
-#>>> EDA / Topic Name
           contentType: application/json
 
 logging:
@@ -55,40 +55,12 @@ logging:
     org.hibernate.type: trace
     org.springframework.cloud: debug
 
-
-server:
-  port: 8084
-
 ---
 
 spring:
   profiles: docker
-  jpa:
-    properties:
-      hibernate:
-        show_sql: true
-        format_sql: true
-        implicit_naming_strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl
   cloud:
     stream:
       kafka:
         binder:
-          brokers: my-kafka:9092
-        streams:
-          binder:
-            configuration:
-              default:
-                key:
-                  serde: org.apache.kafka.common.serialization.Serdes$StringSerde
-                value:
-                  serde: org.apache.kafka.common.serialization.Serdes$StringSerde
-      bindings:
-        event-in:
-          group: books
-          destination: mp
-          contentType: application/json
-        event-out:
-          destination: mp
-          contentType: application/json
-
-
+          brokers: my-kafka:9092  # Docker 환경에서만 다른 Kafka 주소
