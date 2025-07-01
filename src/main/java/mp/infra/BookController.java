@@ -61,10 +61,13 @@ public class BookController {
     @PostMapping("/create")
     public ResponseEntity<String> createBook(@RequestBody BookCreateRequestDto dto) {
         try {
+            UUID bookId = UUID.randomUUID();
+            dto.setBookId(bookId);
             bookService.saveBook(dto);
             // 2. 카프카는 별도 try-catch로 처리 (실패해도 책 저장은 성공)
             try {
                 BookInfoSent event = new BookInfoSent();
+                event.setBookId(bookId);
                 event.setAuthorId(dto.getAuthorId());
                 event.setTitle(dto.getTitle());
 
@@ -86,7 +89,7 @@ public class BookController {
     private BookRepository bookRepository;
 
     @GetMapping("/read")
-    public ResponseEntity<BookReadResponseDto> readBook(@RequestParam UUID book_id) {
+    public ResponseEntity<BookReadResponseDto> readBook(@RequestParam("bookId") UUID book_id) {
         try {
             Optional<Book> optionalBook = bookRepository.findById(book_id); // ← 여기 OK
             if (optionalBook.isPresent()) {
@@ -104,7 +107,7 @@ public class BookController {
 
                 response.setContent(book.getContent());     // 이 필드들이 Book에 있어야 함
                 response.setAudioUrl(book.getAudioUrl());
-
+                bookRepository.save(book);
                 return ResponseEntity.ok(response);
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

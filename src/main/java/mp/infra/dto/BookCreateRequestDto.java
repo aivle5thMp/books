@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class BookCreateRequestDto {
-
+    private UUID bookId;
     private UUID authorId;
     private String authorName;
     private String title;
@@ -19,11 +19,19 @@ public class BookCreateRequestDto {
 
     // 기본 생성자
     public BookCreateRequestDto() {}
+
+    public UUID getBookId() {
+        return bookId;
+    }
+
+    public UUID setBookId(UUID bookId) {
+        return this.bookId;
+    }
     public UUID getAuthorId() {
         return authorId;
     }
     public UUID setAuthorId() {
-        return authorId;
+        return this.authorId;
     }
     // Getters & Setters
     public String getAuthorName() {
