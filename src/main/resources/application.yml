@@ -1,17 +1,92 @@
-server:
-  port: 8084
-kafka:
-  topics:
-    book-info-sent: book.published.v1
+#server:
+#  port: 8084
+#kafka:
+#  topics:
+#    book-info-sent: book.published.v1
+#spring:
+#  kafka:
+#    active: default
+#    bootstrap-servers: localhost:9092
+#    producer:
+#      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+#      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+#      properties:
+#        spring.json.type.mapping: bookInfoSent:mp.infra.BookInfoSent
+#        spring.json.add.type.headers: true  # 👈 이 줄 추가!
+#  application:
+#    name: books
+#  jackson:
+#    property-naming-strategy: LOWER_CAMEL_CASE
+#  http:
+#    encoding:
+#      charset: UTF-8
+#      enabled: true
+#      force: true
+#  datasource:
+#    url: jdbc:h2:file:./data/bookdb
+#    driver-class-name: org.h2.Driver
+#    username: sa
+#    password:
+#  h2:
+#    console:
+#      enabled: true
+#      path: /h2-console
+#    datasource:
+#      url: jdbc:h2:mem:testdb
+#      driver-class-name: org.h2.Driver
+#      username: sa
+#      password:
+#  jpa:
+#    properties:
+#      hibernate:
+#        show_sql: true
+#        format_sql: true
+#        implicit_naming_strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl
+#    hibernate:
+#      ddl-auto: update
+#  sql:
+#    init:
+#      mode: always
+#  cloud:
+#    stream:
+#      kafka:
+#        binder:
+#          brokers: localhost:9092
+#        streams:
+#          binder:
+#            configuration:
+#              default:
+#                key:
+#                  serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+#                value:
+#                  serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+#      bindings:
+#        event-in:
+#          group: books
+#          destination: mp
+#          contentType: application/json
+#        event-out:
+#          destination: mp
+#          contentType: application/json
+#
+#logging:
+#  level:
+#    org.hibernate.type: trace
+#    org.springframework.cloud: debug
+#
+#---
+# Docker 프로필 설정
 spring:
+  profiles: docker
   kafka:
-    bootstrap-servers: localhost:9092
+    active: docker
+    bootstrap-servers: kafka:9092  # 컨테이너명을 kafka로 변경
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer  # 이거 추가!
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
         spring.json.type.mapping: bookInfoSent:mp.infra.BookInfoSent
-
+        spring.json.add.type.headers: true
   application:
     name: books
   jackson:
@@ -30,11 +105,6 @@ spring:
     console:
       enabled: true
       path: /h2-console
-    datasource:
-      url: jdbc:h2:mem:testdb
-      driver-class-name: org.h2.Driver
-      username: sa
-      password:
   jpa:
     properties:
       hibernate:
@@ -42,7 +112,7 @@ spring:
         format_sql: true
         implicit_naming_strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl
     hibernate:
-      ddl-auto: update
+      ddl-auto: update  # create-drop에서 update로 변경 (데이터 보존)
   sql:
     init:
       mode: always
@@ -50,7 +120,7 @@ spring:
     stream:
       kafka:
         binder:
-          brokers: localhost:9092
+          brokers: kafka:9092  # 여기도 kafka로 변경
         streams:
           binder:
             configuration:
@@ -67,46 +137,13 @@ spring:
         event-out:
           destination: mp
           contentType: application/json
+
+# Docker 프로필에서도 카프카 토픽 설정 필요
+kafka:
+  topics:
+    book-info-sent: book.published.v1
 
 logging:
   level:
     org.hibernate.type: trace
     org.springframework.cloud: debug
-
----
-
-spring:
-  profiles: docker
-  jpa:
-    properties:
-      hibernate:
-        show_sql: true
-        format_sql: true
-        implicit_naming_strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl
-    hibernate:
-      ddl-auto: create-drop
-  cloud:
-    stream:
-      kafka:
-        binder:
-          brokers: my-kafka:9092
-        streams:
-          binder:
-            configuration:
-              default:
-                key:
-                  serde: org.apache.kafka.common.serialization.Serdes$StringSerde
-                value:
-                  serde: org.apache.kafka.common.serialization.Serdes$StringSerde
-      bindings:
-        event-in:
-          group: books
-          destination: mp
-          contentType: application/json
-        event-out:
-          destination: mp
-          contentType: application/json
-
-kafka:
-  topics:
-    book-info-sent: book.published.v1
