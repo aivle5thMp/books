@@ -1,4 +1,4 @@
-INSERT INTO books (id, author_id, author_name, title, price, category, summary, content, image_url, audio_url, today_count, total_count, created_at)
+INSERT INTO books (id, author_id, author_name, title, point, category, summary, content, image_url, audio_url, today_count, total_count, created_at)
 VALUES
 (CAST('7f29d760-50c9-4e7c-810f-91b6f8b1de01' AS UUID),
  CAST('a1b2c3d4-e5f6-7890-abcd-ef1234567890' AS UUID),

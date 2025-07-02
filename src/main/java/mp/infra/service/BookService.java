@@ -68,8 +68,10 @@ public class BookService {
     }
     public void saveBook(BookCreateRequestDto dto) {
         Book book = new Book();
+        book.setAuthorId(dto.getAuthorId());
         book.setAuthorName(dto.getAuthorName());
         book.setTitle(dto.getTitle());
+        book.setPoint(dto.getPoint());
         book.setCategory(dto.getCategory());
         book.setSummary(dto.getSummary());
         book.setContent(dto.getContent());

@@ -10,7 +10,7 @@ public class BookCreateRequestDto {
     private UUID authorId;
     private String authorName;
     private String title;
-    private int price;
+    private Integer point;
     private String category;
     private String summary;
     private String content;
@@ -48,6 +48,16 @@ public class BookCreateRequestDto {
 
     public void setTitle(String title) {
         this.title = title;
+
+    }
+
+
+    // Getter/Setter 모두 필요!
+    public Integer getPoint() {
+        return point;
+    }
+    public void setPoint(Integer point) {
+        this.point = point;
     }
 
     public String getCategory() {
@@ -97,7 +107,7 @@ public class BookCreateRequestDto {
                 this.authorId,// 자동 생성 UUID
                 this.authorName,
                 this.title,
-                this.price,
+                this.point,
                 this.category,
                 this.summary,
                 this.content,

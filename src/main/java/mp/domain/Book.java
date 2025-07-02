@@ -19,8 +19,8 @@ public class Book {
     @Column(name = "title")
     private String title;
 
-    @Column(name = "price")
-    private int price;
+    @Column(name = "point")
+    private Integer point;
 
 
     @Column(name = "category")
@@ -50,14 +50,14 @@ public class Book {
     // Constructors
     public Book() {}
 
-    public Book(UUID bookId, UUID authorId, String authorName, String title, Integer Price, String category,
+    public Book(UUID bookId, UUID authorId, String authorName, String title, Integer point, String category,
                 String summary, String content, String imageUrl, String audioUrl,
                 Integer todayCount, Integer totalCount, LocalDateTime createdAt) {
         this.bookId = bookId;
         this.authorId  = authorId;
         this.authorName = authorName;
         this.title = title;
-        this.price = Price;
+        this.point = point;
         this.category = category;
         this.summary = summary;
         this.content = content;
@@ -79,7 +79,7 @@ public class Book {
     public void setBookId(UUID bookId) { this.bookId = bookId; }
 
     public UUID getauthorId() { return authorId; }
-    public void setauthorId(UUID authorId) { this.authorId = authorId; }
+    public void setAuthorId(UUID authorId) { this.authorId = authorId; }
 
     public String getAuthorName() { return authorName; }
     public void setAuthorName(String authorName) { this.authorName = authorName; }
@@ -87,6 +87,15 @@ public class Book {
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
 
+
+
+    // Getter/Setter 모두 필요!
+    public Integer getPoint() {
+        return point;
+    }
+    public void setPoint(Integer point) {
+        this.point = point;
+    }
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
 
